@@ -11,7 +11,6 @@ public class GridManager : MonoBehaviour
     Astar astar;
     protected Vector2 Start;
     protected Vector2 End;
-    public List<Node> path;
 
     void Awake()
     {
@@ -32,15 +31,22 @@ public class GridManager : MonoBehaviour
         {
             for (int x = 0; x < Rows; x++)
             {
-                bool inp = false;
-                var obstalce = Random.Range(0, 69);
-                if (obstalce % 11 == 0)
-                    inp = true;
+                var type = Node.type.environment;
+                if (x == Start.x && y == Start.y)
+                {
+                    type = Node.type.start;
+                }
+                else if (x == End.x && y == End.y)
+                {
+                    type = Node.type.end;
+                }
 
-                Grid[x, y] = new Node(inp, x, y, new Vector2(x-((int)Camera.main.orthographicSize - 0.5f), y - ((int)Camera.main.orthographicSize - 0.5f)));
+                Grid[x, y] = new Node(type, x, y, new Vector2(x-((int)Camera.main.orthographicSize - 0.5f), y - ((int)Camera.main.orthographicSize - 0.5f)));
                 SpawnTile(Grid[x,y],x,y);
             }
         }
+
+        UpdateTile();
     }
     
     public Node GetNodeFromGrid(Vector2 gridPosition)
@@ -73,6 +79,57 @@ public class GridManager : MonoBehaviour
         return neighbours;
     }
 
+    public bool TopRightCorner(Node node)
+    {
+        if(node.y + 1 < Rows && node.x + 1 < Columns)
+        {
+            if (Grid[node.x, node.y + 1].Type == Node.type.obstalce && Grid[node.x + 1, node.y].Type == Node.type.obstalce)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool TopLeftCorner(Node node)
+    {
+        if (node.y + 1 < Rows && node.x - 1 >= 0)
+        {
+            if (Grid[node.x, node.y + 1].Type == Node.type.obstalce && Grid[node.x - 1, node.y].Type == Node.type.obstalce)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool DownRightCorner(Node node)
+    {
+        if (node.y - 1 >= 0 && node.x + 1 < Columns)
+        {
+            if (Grid[node.x, node.y - 1].Type == Node.type.obstalce && Grid[node.x + 1, node.y].Type == Node.type.obstalce)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool DownLeftCorner(Node node)
+    {
+        if (node.y - 1 >= 0 && node.x - 1 >= 0)
+        {
+            if (Grid[node.x, node.y - 1].Type == Node.type.obstalce && Grid[node.x - 1, node.y].Type == Node.type.obstalce)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void SpawnTile(Node node, int x, int y)
     {
         node.g = new GameObject("X: " + x + "Y: " + y);
@@ -82,45 +139,55 @@ public class GridManager : MonoBehaviour
 
     public void UpdateTile()
     {
-        for (int y = 0; y < Columns; y++)
+        foreach(Node n in Grid)
         {
-            for (int x = 0; x < Rows; x++)
+            var s = Grid[n.x, n.y].g.GetComponent<SpriteRenderer>();
+            s.sprite = sprite;
+
+            if (n.Type == Node.type.start)
             {
-                var s = Grid[x,y].g.GetComponent<SpriteRenderer>();
-                s.sprite = sprite;
-
-                if (x == Start.x && y == Start.y)
-                {
-                    s.color = new Color(0, 1, 0);
-                }
-                else if (x == End.x && y == End.y)
-                {
-                    s.color = new Color(0, 0, 1);
-                }
-                else if (x == )
-                {
-
-                }
-                else
-                {
-                    s.color = new Color(1, 1, 1);
-                }
-
-                if (path !=null)
-                {
-                    foreach (Node n in path)
-                    {
-                        Debug.Log(End.x + " " + End.y);
-                        if (x == n.x && y == n.y && (x != End.x || y != End.y))
-                        {
-                            Debug.Log(x + " " + y);
-                            s.color = new Color(0, 0, 0);
-                        }
-
-                    }
-                }
+                s.color = new Color(0, 1, 0);
+            }
+            else if (n.Type == Node.type.end)
+            {
+                s.color = new Color(0, 0, 1);
+            }
+            else if (n.Type == Node.type.path)
+            {
+                s.color = new Color(0, 0, 0);
+            }
+            else if (n.Type == Node.type.obstalce)
+            {
+                s.color = new Color(1, 0, 0);
+            }
+            else
+            {
+                s.color = new Color(1, 1, 1);
             }
         }
 
+    }
+
+    public void GenerateObstacle(Vector2 mousePosition)
+    {  
+        foreach (Node n in Grid)
+        {
+            float checkX = n.worldPosition.x - Camera.main.ScreenToWorldPoint(mousePosition).x;
+            float checkY = n.worldPosition.y - Camera.main.ScreenToWorldPoint(mousePosition).y;
+            if (Mathf.Abs(checkX) <= 0.5f && Mathf.Abs(checkY) <= 0.5f)
+            {
+                Debug.Log("1");
+                if(n.Type == Node.type.obstalce)
+                {
+                    Debug.Log("2");
+                    n.Type = Node.type.environment;
+                }
+                else
+                {
+                    n.Type = Node.type.obstalce;
+                }
+            }
+
+        }
     }
 }

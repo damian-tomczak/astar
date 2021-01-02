@@ -261,5 +261,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a09990be73c908e47843fa8540d59eb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Start: {x: 1, y: 1}
-  End: {x: 10, y: 15}
+  Start: {x: 1, y: 15}
+  End: {x: 10, y: 1}

@@ -8,8 +8,8 @@ public class Astar : MonoBehaviour
     public Vector2 End;
     GridManager grid;
 
-    float waitTime = 1.0f;
-    float timer = 0.0f;
+    List<Node> path = new List<Node>();
+
     void Awake()
     {
         grid = GetComponent<GridManager>();
@@ -17,15 +17,26 @@ public class Astar : MonoBehaviour
 
     void Update()
     {
-        timer += Time.deltaTime;
+        if (Input.GetMouseButtonDown(0))
+        {
+            grid.GenerateObstacle(Input.mousePosition);
+            grid.UpdateTile();
+        }
 
-        if (timer >= waitTime)
+        if (Input.GetKeyDown(KeyCode.X))
         {
             FindPath(Start, End);
-            grid.UpdateTile();  
-            timer -= waitTime;
+            grid.UpdateTile();
+
+            if (path.Count > 0)
+            {
+                foreach (Node n in path)
+                {
+                    n.Type = Node.type.environment;
+                }
+                path.Clear();
+            }
         }
-        
     }
 
     void FindPath(Vector2 startPos, Vector2 endPos)
@@ -58,16 +69,38 @@ public class Astar : MonoBehaviour
 
             if(node == endNode)
             {
+                Debug.Log("Found path!");
                 FollowPath(startNode, endNode);
                 return;
             }
 
             foreach (Node neighbour in grid.GetNeigbours(node))
             {
-                if(neighbour.bisWall || closedSet.Contains(neighbour))
+                if(neighbour.Type == Node.type.obstalce || closedSet.Contains(neighbour))
                 {
                     continue;
                 }
+
+                if(grid.TopRightCorner(neighbour))
+                {
+                    continue;
+                }
+
+                if (grid.TopLeftCorner(neighbour))
+                {
+                    continue;
+                }
+
+                if (grid.DownRightCorner(neighbour))
+                {
+                    continue;
+                }
+
+                if (grid.DownLeftCorner(neighbour))
+                {
+                    continue;
+                }
+
 
                 int newCostToNeigbour = node.gCost + GetDistance(node, neighbour);
                 if(newCostToNeigbour < neighbour.gCost || !openSet.Contains(neighbour))
@@ -88,18 +121,18 @@ public class Astar : MonoBehaviour
 
     void FollowPath(Node startNode, Node endNode)
     {
-        List<Node> path = new List<Node>();
+ 
         Node currentNode = endNode;
 
-        while(currentNode != startNode)
+        while (currentNode != startNode)
         {
+            currentNode.Type = Node.type.path;
             path.Add(currentNode);
             currentNode = currentNode.parent;
 
         }
-        path.Reverse();
-
-        grid.path = path;
+        path.RemoveAt(0);
+        endNode.Type = Node.type.end;
     }
 
     int GetDistance(Node nodeA, Node nodeB)
