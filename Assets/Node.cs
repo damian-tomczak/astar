@@ -4,15 +4,36 @@ using UnityEngine;
 
 public class Node
 {
+    // Position on the grid
     public int x;
     public int y;
+    // Position on the playing surface 
+    public Vector2 worldPosition;
 
+    // Distance from end node
     public int hCost;
+    // Distance from starting node
     public int gCost;
 
+    // Is Node a obstacle?
     public bool bisWall;
 
+    public Node parent;
 
+    public GameObject g;
+
+    public enum type 
+    {
+        environment,
+        obstalce,
+        start,
+        end,
+        path
+    }
+
+    public type Type;
+        
+    // Sum of gCost and hCost
     public int fCost
     {
         get
@@ -21,10 +42,12 @@ public class Node
         }
     }
 
-    public Node(bool bisWall, int x, int y)
+    public Node(type _type, int _x, int _y, Vector2 _worldPosition)
     {
-        this.bisWall = bisWall;
-        this.x = x;
-        this.y = y;
+        bisWall = _bisWall;
+        x = _x;
+        y = _y;
+        worldPosition = _worldPosition;
+        Type = _type;
     }
 }
