@@ -67,6 +67,7 @@ public class Astar : MonoBehaviour
             openSet.Remove(node);
             closedSet.Add(node);
 
+
             if(node == endNode)
             {
                 Debug.Log("Found path!");
@@ -74,33 +75,50 @@ public class Astar : MonoBehaviour
                 return;
             }
 
-            foreach (Node neighbour in grid.GetNeigbours(node))
+            foreach (Node neighbour in grid.GetNeighbours(node))
             {
                 if(neighbour.Type == Node.type.obstalce || closedSet.Contains(neighbour))
                 {
                     continue;
                 }
 
-                if(grid.TopRightCorner(neighbour))
+                /*
+                Checking if the corner has the form:
+                []
+                  []
+                instead of:
+                [][]
+                  []
+                FOR FOUR CASES:
+                */
+                if (neighbour.x == node.x + 1 && neighbour.y == node.y - 1)
                 {
-                    continue;
+                    if (grid.TopLeftCorner(neighbour))
+                    {
+                        continue;
+                    }
                 }
-
-                if (grid.TopLeftCorner(neighbour))
+                else if (neighbour.x == node.x - 1 && neighbour.y == node.y - 1)
                 {
-                    continue;
+                    if (grid.TopRightCorner(neighbour))
+                    {
+                        continue;
+                    }
                 }
-
-                if (grid.DownRightCorner(neighbour))
+                else if (neighbour.x == node.x + 1 && neighbour.y == node.y + 1)
                 {
-                    continue;
+                    if (grid.DownLeftCorner(neighbour))
+                    {
+                        continue;
+                    }
                 }
-
-                if (grid.DownLeftCorner(neighbour))
+                else
                 {
-                    continue;
+                    if (grid.DownRightCorner(neighbour))
+                    {
+                        continue;
+                    }
                 }
-
 
                 int newCostToNeigbour = node.gCost + GetDistance(node, neighbour);
                 if(newCostToNeigbour < neighbour.gCost || !openSet.Contains(neighbour))

@@ -7,18 +7,23 @@ public class Node
     // Position on the grid
     public int x;
     public int y;
+
     // Position on the playing surface
     public Vector2 worldPosition;
 
     // Distance from end node
     public int hCost;
+    
     // Distance from starting node
     public int gCost;
 
+    // From which neighbor it evolved
     public Node parent;
 
+    // Object visualization 
     public GameObject g;
 
+    // Type of Node
     public enum type 
     {
         environment,

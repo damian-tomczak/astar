@@ -54,10 +54,11 @@ public class GridManager : MonoBehaviour
         return Grid[(int)gridPosition.x, (int)gridPosition.y];
     }
 
-    public List<Node> GetNeigbours(Node node)
+    public List<Node> GetNeighbours(Node node)
     {
         List<Node> neighbours = new List<Node>();
 
+        // Checking neighbors
         for(int x = -1; x<=1;x++)
         {
             for(int y = -1; y<= 1;y++)
@@ -70,17 +71,29 @@ public class GridManager : MonoBehaviour
                 int checkX = node.x + x;
                 int checkY = node.y + y;
 
+                // Checking that it doesn't go beyond the Grid
                 if (checkX >= 0 && checkX < Rows && checkY >0 && checkY < Columns)
                 {
                     neighbours.Add(Grid[checkX, checkY]);
                 }
             }
         }
+
         return neighbours;
     }
 
+    /*
+    Checking if the corner has the form:
+    []
+      []
+    instead of:
+    [][]
+      []
+    FOR FOUR CASES:
+    */
     public bool TopRightCorner(Node node)
     {
+        // Checking that it doesn't go beyond the Grid
         if(node.y + 1 < Rows && node.x + 1 < Columns)
         {
             if (Grid[node.x, node.y + 1].Type == Node.type.obstalce && Grid[node.x + 1, node.y].Type == Node.type.obstalce)
@@ -176,10 +189,8 @@ public class GridManager : MonoBehaviour
             float checkY = n.worldPosition.y - Camera.main.ScreenToWorldPoint(mousePosition).y;
             if (Mathf.Abs(checkX) <= 0.5f && Mathf.Abs(checkY) <= 0.5f)
             {
-                Debug.Log("1");
                 if(n.Type == Node.type.obstalce)
                 {
-                    Debug.Log("2");
                     n.Type = Node.type.environment;
                 }
                 else
